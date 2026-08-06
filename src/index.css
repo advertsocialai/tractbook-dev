@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-wordmark: "Roboto Slab", serif;
+
+  /* Tractbook brand palette, pulled from source designs */
+  --color-brand-blue: #0d44da;
+  --color-brand-blue-dark: #002df8;
+  --color-brand-blue-mid: #124bd1;
+  --color-brand-blue-light: #b1bffe;
+  --color-brand-error: #e0645f;
+  --color-brand-success: #4fb33f;
+  --color-brand-success-dark: #2e7053;
+  --color-ink: #000000;
+  --color-body: #545454;
+  --color-muted: #9e9e9e;
+  --color-border: #e2e2e2;
+  --color-border-soft: #b4b4b4;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile-first app shell: content centers on wide viewports, full-bleed on phones */
+.app-shell {
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 430px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position: relative;
+}
