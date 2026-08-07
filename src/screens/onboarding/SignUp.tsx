@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react"
+﻿import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 
@@ -35,15 +35,6 @@ export default function SignUp() {
   const message = strengthMessage[passwordState]
   const canSubmit = email.trim().length > 0 && password.length >= 8 && !loading
 
-  // After showing the "check your inbox" screen, drop the user on the
-  // sign-in page automatically so they're ready to log back in once
-  // they've clicked the verification link.
-  useEffect(() => {
-    if (!verificationSent) return
-    const timer = setTimeout(() => navigate("/login"), 4000)
-    return () => clearTimeout(timer)
-  }, [verificationSent, navigate])
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
@@ -67,7 +58,8 @@ export default function SignUp() {
 
     if (!data.session) {
       // Email confirmation is required — Supabase already sent the
-      // verification link. Show the confirmation screen instead of erroring.
+      // verification link. Show the confirmation screen and let the
+      // user proceed manually once they've actually verified.
       setVerificationSent(true)
       return
     }
