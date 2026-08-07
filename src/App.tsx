@@ -15,6 +15,7 @@ import BusinessContext from "./screens/onboarding/BusinessContext";
 import InviteAccountant from "./screens/onboarding/InviteAccountant";
 import Dashboard from "./screens/onboarding/Dashboard";
 import ComingSoon from "./screens/onboarding/ComingSoon";
+import AuthCallback from "./screens/onboarding/AuthCallback";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
       <Route path="/invite-accountant" element={<InviteAccountant />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/coming-soon/:feature" element={<ComingSoon />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

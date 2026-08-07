@@ -71,6 +71,9 @@ export default function SignUp() {
     setError(null)
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     if (oauthError) setError(oauthError.message)
   }
@@ -173,3 +176,5 @@ export default function SignUp() {
     </div>
   )
 }
+
+
