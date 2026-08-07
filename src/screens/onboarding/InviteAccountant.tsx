@@ -1,17 +1,36 @@
 ﻿import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import { supabase } from "../../lib/supabase"
 
 type InviteChoice = "yes" | "no" | "self" | ""
+
+interface PriorState {
+  firstName?: string
+  lastName?: string
+  businessName?: string
+  yearStarted?: string
+  legalStructure?: string
+  country?: string
+  businessNumber?: string
+  taxRegNumber?: string
+  region?: string
+  industry?: string
+  bookkeeping?: string
+  goal?: string
+  teamSize?: string
+}
 
 export default function InviteAccountant() {
   const navigate = useNavigate()
   const location = useLocation()
-  const priorState = (location.state as Record<string, unknown>) || {}
+  const priorState = (location.state as PriorState) || {}
 
   const [choice, setChoice] = useState<InviteChoice>("")
   const [accountantEmail, setAccountantEmail] = useState("")
   const [accountantName, setAccountantName] = useState("")
   const [inviteSent, setInviteSent] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const canContinue =
     choice === "no" ||
@@ -20,17 +39,80 @@ export default function InviteAccountant() {
 
   function handleSendInvite() {
     if (!accountantEmail.trim()) return
-    // TEMP: no real invite email is sent yet.
-    // TODO: wire to backend invite endpoint (creates invites row, sends email via Klara/notification service)
+    // Invite row is created in handleNext once the business exists -
+    // this just marks the UI state as "ready to send" for now.
     setInviteSent(true)
   }
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
-    if (!canContinue) return
-    navigate("/dashboard", {
-      state: { ...priorState, accountantChoice: choice, accountantEmail, accountantName },
+    if (!canContinue || saving) return
+    setSaving(true)
+    setError(null)
+
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      setError("You must be signed in to continue.")
+      setSaving(false)
+      return
+    }
+    const userId = userData.user.id
+
+    const { data: business, error: businessError } = await supabase
+      .from("businesses")
+      .insert({
+        name: priorState.businessName || "Untitled Business",
+        legal_structure: priorState.legalStructure || null,
+        year_started: priorState.yearStarted ? Number(priorState.yearStarted) : null,
+        country: priorState.country || "US",
+        industry: priorState.industry || null,
+        business_number: priorState.businessNumber || null,
+        tax_registration_number: priorState.taxRegNumber || null,
+        region: priorState.region || null,
+        bookkeeping_method: priorState.bookkeeping || null,
+        main_goal: priorState.goal || null,
+        team_size: priorState.teamSize || null,
+        created_by: userId,
+      })
+      .select()
+      .single()
+
+    if (businessError || !business) {
+      setError(businessError?.message || "Failed to create business.")
+      setSaving(false)
+      return
+    }
+
+    const { error: memberError } = await supabase.from("business_members").insert({
+      business_id: business.id,
+      user_id: userId,
+      role: "owner",
+      status: "active",
     })
+
+    if (memberError) {
+      setError(memberError.message)
+      setSaving(false)
+      return
+    }
+
+    if (choice === "yes" && accountantEmail.trim()) {
+      const { error: inviteError } = await supabase.from("invites").insert({
+        business_id: business.id,
+        email: accountantEmail.trim(),
+        name: accountantName.trim() || null,
+        role: "accountant",
+        invited_by: userId,
+      })
+      if (inviteError) {
+        setError(inviteError.message)
+        setSaving(false)
+        return
+      }
+    }
+
+    setSaving(false)
+    navigate("/dashboard", { state: { businessId: business.id } })
   }
 
   return (
@@ -74,7 +156,10 @@ export default function InviteAccountant() {
               <input
                 type="email"
                 value={accountantEmail}
-                onChange={(e) => setAccountantEmail(e.target.value)}
+                onChange={(e) => {
+                  setAccountantEmail(e.target.value)
+                  setInviteSent(false)
+                }}
                 placeholder="accountant@firm.ca"
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600"
               />
@@ -100,7 +185,7 @@ export default function InviteAccountant() {
               Send invite
             </button>
             {inviteSent && (
-              <p className="text-red-500 text-xs">Invitation sent to your email</p>
+              <p className="text-red-500 text-xs">Invitation queued - will be sent once you finish setup</p>
             )}
           </div>
         )}
@@ -145,6 +230,8 @@ export default function InviteAccountant() {
           </div>
         </label>
 
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <div className="flex gap-3 pt-2">
           <button
             type="button"
@@ -155,10 +242,10 @@ export default function InviteAccountant() {
           </button>
           <button
             type="submit"
-            disabled={!canContinue}
+            disabled={!canContinue || saving}
             className="flex-1 bg-blue-700 disabled:bg-blue-200 text-white rounded-lg py-3 font-medium"
           >
-            Next
+            {saving ? "Setting up..." : "Next"}
           </button>
         </div>
       </form>
