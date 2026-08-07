@@ -39,8 +39,6 @@ export default function InviteAccountant() {
 
   function handleSendInvite() {
     if (!accountantEmail.trim()) return
-    // Invite row is created in handleNext once the business exists -
-    // this just marks the UI state as "ready to send" for now.
     setInviteSent(true)
   }
 
@@ -112,7 +110,14 @@ export default function InviteAccountant() {
     }
 
     setSaving(false)
-    navigate("/dashboard", { state: { businessId: business.id } })
+    navigate("/dashboard", {
+      state: {
+        businessId: business.id,
+        businessName: business.name,
+        firstName: priorState.firstName,
+        justCreated: true,
+      },
+    })
   }
 
   return (

@@ -11,6 +11,8 @@ import TaxDetails from "./screens/onboarding/TaxDetails";
 import Industry from "./screens/onboarding/Industry";
 import BusinessContext from "./screens/onboarding/BusinessContext";
 import InviteAccountant from "./screens/onboarding/InviteAccountant";
+import Dashboard from "./screens/onboarding/Dashboard";
+import ComingSoon from "./screens/onboarding/ComingSoon";
 
 function App() {
   return (
@@ -27,7 +29,8 @@ function App() {
       <Route path="/industry" element={<Industry />} />
       <Route path="/business-context" element={<BusinessContext />} />
       <Route path="/invite-accountant" element={<InviteAccountant />} />
-      {/* /dashboard is the next milestone - not built yet */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/coming-soon/:feature" element={<ComingSoon />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

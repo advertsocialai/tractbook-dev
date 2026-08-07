@@ -1,10 +1,8 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-wordmark: "Roboto Slab", serif;
-
-  /* Tractbook brand palette, pulled from source designs */
   --color-brand-blue: #0d44da;
   --color-brand-blue-dark: #002df8;
   --color-brand-blue-mid: #124bd1;
@@ -29,9 +27,20 @@ body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(
+    180deg,
+    rgba(177, 191, 254, 0.12) 0%,
+    rgba(177, 191, 254, 0.03) 35%,
+    rgba(255, 255, 255, 1) 70%
+  );
 }
 
-/* Mobile-first app shell: content centers on wide viewports, full-bleed on phones */
+h1, h2, h3 {
+  font-family: var(--font-wordmark);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
 .app-shell {
   min-height: 100dvh;
   width: 100%;
@@ -39,6 +48,29 @@ body {
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: transparent;
   position: relative;
+}
+
+/* Desktop/web: frame every screen like a real phone instead of a bare narrow column */
+@media (min-width: 768px) {
+  body {
+    background: #eef1f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 0;
+  }
+
+  #root > div,
+  .max-w-sm {
+    background: #fff;
+    min-height: 844px;
+    max-height: 844px;
+    width: 391px;
+    overflow-y: auto;
+    border-radius: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
 }
