@@ -1,7 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
-
 export default function SignIn() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
@@ -9,38 +8,30 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
     setLoading(true)
     setError(null)
-
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-
     setLoading(false)
-
     if (signInError) {
       setError(signInError.message)
       return
     }
-
     console.log("Signed in:", data)
     navigate("/verify-phone")
   }
-
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
       <h1 className="text-2xl font-bold mb-1">Welcome back</h1>
       <p className="text-gray-500 text-sm mb-8">
         Sign in to continue to Tractbook
       </p>
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Email Address</label>
@@ -52,7 +43,6 @@ export default function SignIn() {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600"
           />
         </div>
-
         <div>
           <div className="flex justify-between items-baseline">
             <label className="block text-sm font-medium mb-1">Password</label>
@@ -71,10 +61,13 @@ export default function SignIn() {
             placeholder="Enter your password"
             className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600"
           />
+          <div className="text-right mt-1">
+            <a href="/forgot-password" className="text-blue-600 text-sm">
+              Forgot password?
+            </a>
+          </div>
         </div>
-
         {error && <p className="text-red-500 text-sm">{error}</p>}
-
         <button
           type="submit"
           disabled={!canSubmit}
@@ -83,7 +76,6 @@ export default function SignIn() {
           {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-
       <p className="text-center text-sm mt-6">
         Don't have an account?{" "}
         <a href="/sign-up" className="text-blue-600 font-medium">Sign up now.</a>

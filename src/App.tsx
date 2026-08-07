@@ -2,6 +2,8 @@
 import Welcome from "./screens/onboarding/Welcome";
 import SignUp from "./screens/onboarding/SignUp";
 import SignIn from "./screens/onboarding/SignIn";
+import ForgotPassword from "./screens/onboarding/ForgotPassword";
+import ResetPassword from "./screens/onboarding/ResetPassword";
 import VerifyPhone from "./screens/onboarding/VerifyPhone";
 import VerifyCode from "./screens/onboarding/VerifyCode";
 import Loading from "./screens/onboarding/Loading";
@@ -20,6 +22,8 @@ function App() {
       <Route path="/" element={<Welcome />} />
       <Route path="/sign-up" element={<SignUp />} />
       <Route path="/login" element={<SignIn />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-phone" element={<VerifyPhone />} />
       <Route path="/loading" element={<Loading />} />
       <Route path="/verify-code" element={<VerifyCode />} />
