@@ -1,11 +1,13 @@
 ﻿import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import { supabase } from "../../lib/supabase"
 
 const CODE_LENGTH = 6
 const RESEND_SECONDS = 45
 
 interface IncomingState {
   phone?: string
+  fullPhone?: string
   existingUser?: boolean
   businessId?: string
   businessName?: string
@@ -20,6 +22,8 @@ export default function VerifyCode() {
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""))
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS)
+  const [verifying, setVerifying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
@@ -39,7 +43,7 @@ export default function VerifyCode() {
     }
 
     if (next.every((d) => d !== "")) {
-      handleVerify()
+      handleVerify(next.join(""))
     }
   }
 
@@ -49,9 +53,30 @@ export default function VerifyCode() {
     }
   }
 
-  function handleVerify() {
-    // TEMP: no real OTP has been sent yet (Twilio not wired).
-    // TODO: replace with supabase.auth.verifyOtp({ phone, token: code, type: 'sms' })
+  async function handleVerify(code: string) {
+    if (!incoming.fullPhone) {
+      setError("Missing phone number — please go back and re-enter it.")
+      return
+    }
+
+    setVerifying(true)
+    setError(null)
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      phone: incoming.fullPhone,
+      token: code,
+      type: "phone_change",
+    })
+
+    setVerifying(false)
+
+    if (verifyError) {
+      setError("That code didn't match. Check it and try again.")
+      setDigits(Array(CODE_LENGTH).fill(""))
+      inputRefs.current[0]?.focus()
+      return
+    }
+
     if (incoming.existingUser) {
       navigate("/loading", {
         state: {
@@ -66,10 +91,30 @@ export default function VerifyCode() {
     }
   }
 
-  function handleResend() {
+  function handleDevSkip() {
+    if (incoming.existingUser) {
+      navigate("/loading", {
+        state: {
+          nextPath: "/dashboard",
+          businessId: incoming.businessId,
+          businessName: incoming.businessName,
+          justCreated: false,
+        },
+      })
+    } else {
+      navigate("/loading", { state: { nextPath: "/role" } })
+    }
+  }
+
+  async function handleResend() {
     setSecondsLeft(RESEND_SECONDS)
     setDigits(Array(CODE_LENGTH).fill(""))
+    setError(null)
     inputRefs.current[0]?.focus()
+
+    if (incoming.fullPhone) {
+      await supabase.auth.updateUser({ phone: incoming.fullPhone })
+    }
   }
 
   const timerLabel = `00:${secondsLeft.toString().padStart(2, "0")}`
@@ -97,12 +142,16 @@ export default function VerifyCode() {
             inputMode="numeric"
             maxLength={1}
             value={digit}
+            disabled={verifying}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className="w-12 h-14 text-center text-lg border border-gray-300 rounded-lg outline-none focus:border-blue-600"
+            className="w-12 h-14 text-center text-lg border border-gray-300 rounded-lg outline-none focus:border-blue-600 disabled:bg-gray-100"
           />
         ))}
       </div>
+
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      {verifying && <p className="text-gray-500 text-sm mb-4">Verifying...</p>}
 
       {secondsLeft > 0 ? (
         <p className="text-red-500 text-xs mb-4">
@@ -117,12 +166,14 @@ export default function VerifyCode() {
         </button>
       )}
 
-      <button
-        onClick={handleVerify}
-        className="text-gray-400 text-xs underline mb-6"
-      >
-        Skip for now (dev only)
-      </button>
+      {import.meta.env.DEV && (
+        <button
+          onClick={handleDevSkip}
+          className="text-gray-400 text-xs underline mb-6"
+        >
+          Skip for now (dev only)
+        </button>
+      )}
 
       <p className="text-center text-xs text-gray-500">
         Your data is secure and won't be shared with anyone. Read the details in our{" "}
