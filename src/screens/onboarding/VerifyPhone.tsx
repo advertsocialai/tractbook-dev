@@ -1,5 +1,13 @@
 ﻿import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
+import { supabase } from "../../lib/supabase"
+
+interface IncomingState {
+  existingUser?: boolean
+  businessId?: string
+  businessName?: string
+  email?: string
+}
 
 function isValidNANPNumber(phone: string): boolean {
   const digits = phone.replace(/\D/g, "")
@@ -15,20 +23,41 @@ function formatPhoneDisplay(digits: string): string {
 
 export default function VerifyPhone() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const incoming = (location.state as IncomingState) || {}
   const [phone, setPhone] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const rawDigits = phone.replace(/\D/g, "")
-  const canSubmit = isValidNANPNumber(phone)
+  const canSubmit = isValidNANPNumber(phone) && !loading
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
+    setLoading(true)
+    setError(null)
 
+    const fullPhone = `+1${rawDigits}`
     const displayPhone = `+1 (${rawDigits.slice(0, 3)}) ${rawDigits.slice(3, 6)}-${rawDigits.slice(6)}`
 
-    // TEMP: no real SMS is sent yet (Twilio not wired into Supabase).
-    // TODO: replace with supabase.auth.updateUser({ phone: `+1${rawDigits}` })
-    navigate("/loading", { state: { nextPath: "/verify-code", phone: displayPhone } })
+    const { error: otpError } = await supabase.auth.updateUser({ phone: fullPhone })
+
+    setLoading(false)
+
+    if (otpError) {
+      setError(otpError.message)
+      return
+    }
+
+    navigate("/loading", {
+      state: {
+        nextPath: "/verify-code",
+        phone: displayPhone,
+        fullPhone,
+        ...incoming,
+      },
+    })
   }
 
   return (
@@ -58,12 +87,14 @@ export default function VerifyPhone() {
           Message and data rates may apply.
         </p>
 
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <button
           type="submit"
           disabled={!canSubmit}
           className="w-full bg-blue-700 disabled:bg-blue-200 text-white rounded-lg py-3 font-medium mt-4"
         >
-          Next
+          {loading ? "Sending code..." : "Next"}
         </button>
       </form>
 

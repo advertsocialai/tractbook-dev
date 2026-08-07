@@ -18,13 +18,35 @@ export default function SignIn() {
       email,
       password,
     })
-    setLoading(false)
     if (signInError) {
+      setLoading(false)
       setError(signInError.message)
       return
     }
-    console.log("Signed in:", data)
-    navigate("/verify-phone")
+
+    const userId = data.user.id
+    const { data: membership } = await supabase
+      .from("business_members")
+      .select("business_id, businesses(name)")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle()
+
+    setLoading(false)
+
+    const existingUser = !!membership
+    const businessId = membership?.business_id
+    const businessName = (membership?.businesses as { name?: string } | null)?.name
+
+    navigate("/verify-phone", {
+      state: {
+        existingUser,
+        businessId,
+        businessName,
+        email: data.user.email,
+      },
+    })
   }
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">

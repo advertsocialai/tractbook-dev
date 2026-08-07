@@ -4,21 +4,27 @@ import { useNavigate, useLocation } from "react-router-dom"
 const CODE_LENGTH = 6
 const RESEND_SECONDS = 45
 
+interface IncomingState {
+  phone?: string
+  existingUser?: boolean
+  businessId?: string
+  businessName?: string
+  email?: string
+}
+
 export default function VerifyCode() {
   const navigate = useNavigate()
   const location = useLocation()
-  const phone = (location.state as { phone?: string })?.phone || "+1 (000) 000-0000"
+  const incoming = (location.state as IncomingState) || {}
+  const phone = incoming.phone || "+1 (000) 000-0000"
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""))
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS)
-  const [error, setError] = useState<string | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     if (secondsLeft <= 0) return
-    const timer = setInterval(() => {
-      setSecondsLeft((s) => s - 1)
-    }, 1000)
+    const timer = setInterval(() => setSecondsLeft((s) => s - 1), 1000)
     return () => clearInterval(timer)
   }, [secondsLeft])
 
@@ -27,14 +33,13 @@ export default function VerifyCode() {
     const next = [...digits]
     next[index] = digit
     setDigits(next)
-    setError(null)
 
     if (digit && index < CODE_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus()
     }
 
     if (next.every((d) => d !== "")) {
-      handleVerify(next.join(""))
+      handleVerify()
     }
   }
 
@@ -44,18 +49,27 @@ export default function VerifyCode() {
     }
   }
 
-  function handleVerify(code: string) {
+  function handleVerify() {
     // TEMP: no real OTP has been sent yet (Twilio not wired).
     // TODO: replace with supabase.auth.verifyOtp({ phone, token: code, type: 'sms' })
-    if (code.length !== CODE_LENGTH) return
-    navigate("/loading", { state: { nextPath: "/role" } })
+    if (incoming.existingUser) {
+      navigate("/loading", {
+        state: {
+          nextPath: "/dashboard",
+          businessId: incoming.businessId,
+          businessName: incoming.businessName,
+          justCreated: false,
+        },
+      })
+    } else {
+      navigate("/loading", { state: { nextPath: "/role" } })
+    }
   }
 
   function handleResend() {
     setSecondsLeft(RESEND_SECONDS)
     setDigits(Array(CODE_LENGTH).fill(""))
     inputRefs.current[0]?.focus()
-    // TODO: trigger real resend once Twilio is wired.
   }
 
   const timerLabel = `00:${secondsLeft.toString().padStart(2, "0")}`
@@ -90,20 +104,25 @@ export default function VerifyCode() {
         ))}
       </div>
 
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
       {secondsLeft > 0 ? (
-        <p className="text-red-500 text-xs mb-6">
+        <p className="text-red-500 text-xs mb-4">
           Don't see it? Send a new code in {timerLabel}
         </p>
       ) : (
         <button
           onClick={handleResend}
-          className="w-full bg-blue-700 text-white rounded-lg py-3 font-medium mb-6 mt-2"
+          className="w-full bg-blue-700 text-white rounded-lg py-3 font-medium mb-4 mt-2"
         >
           Send a new code
         </button>
       )}
+
+      <button
+        onClick={handleVerify}
+        className="text-gray-400 text-xs underline mb-6"
+      >
+        Skip for now (dev only)
+      </button>
 
       <p className="text-center text-xs text-gray-500">
         Your data is secure and won't be shared with anyone. Read the details in our{" "}

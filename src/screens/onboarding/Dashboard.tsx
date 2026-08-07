@@ -5,6 +5,7 @@ interface DashboardState {
   businessName?: string
   firstName?: string
   lastName?: string
+  email?: string
   justCreated?: boolean
 }
 
@@ -13,7 +14,10 @@ export default function Dashboard() {
   const location = useLocation()
   const state = (location.state as DashboardState) || {}
 
-  const fullName = [state.firstName, state.lastName].filter(Boolean).join(" ")
+  const fullName =
+    [state.firstName, state.lastName].filter(Boolean).join(" ") ||
+    state.email?.split("@")[0] ||
+    ""
 
   return (
     <div className="relative min-h-screen bg-white flex flex-col max-w-sm mx-auto">
