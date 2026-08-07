@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import StepProgress from "./StepProgress"
 
 const BOOKKEEPING_METHODS = [
   "Excel / Googlesheets - manual",
@@ -39,6 +40,7 @@ export default function BusinessContext() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={5} total={6} />
       <h1 className="text-2xl font-bold mb-1">More About Your Business</h1>
       <p className="text-gray-500 text-sm mb-6">Tell us about you and your business</p>
 

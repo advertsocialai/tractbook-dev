@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import StepProgress from "./StepProgress"
 
 const INDUSTRIES = [
   { key: "construction", label: "Construction & Real Estate", icon: "🏗️" },
@@ -27,6 +28,7 @@ export default function Industry() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={4} total={6} />
       <h1 className="text-2xl font-bold mb-1">What industry are you in?</h1>
       <p className="text-gray-500 text-sm mb-4">
         This personalises your invoices, tax settings and Klara AI for your business type.
@@ -35,7 +37,7 @@ export default function Industry() {
       <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6 flex gap-2 text-sm text-green-800">
         <span>✨</span>
         <span>
-          Klara will set up your HST rates, invoice templates and workflow automations based on your business type — no manual configuration needed.
+          Klara will set up your HST rates, invoice templates and workflow automations based on your business type — no manual configurationneeded.
         </span>
       </div>
 

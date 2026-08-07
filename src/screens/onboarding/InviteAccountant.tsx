@@ -1,6 +1,7 @@
 ﻿import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
+import StepProgress from "./StepProgress"
 
 type InviteChoice = "yes" | "no" | "self" | ""
 
@@ -122,6 +123,7 @@ export default function InviteAccountant() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={6} total={6} />
       <h1 className="text-2xl font-bold mb-1">Invite your Accountant</h1>
       <p className="text-gray-500 text-sm mb-6">Tell us about you and your business</p>
 
@@ -257,3 +259,5 @@ export default function InviteAccountant() {
     </div>
   )
 }
+
+

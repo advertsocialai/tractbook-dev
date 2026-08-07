@@ -1,4 +1,5 @@
 ﻿import { useNavigate } from "react-router-dom"
+import StepProgress from "./StepProgress"
 
 export default function RoleSelect() {
   const navigate = useNavigate()
@@ -9,6 +10,7 @@ export default function RoleSelect() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={1} total={6} />
       <h1 className="text-2xl font-bold mb-1">How will you use Tractbook?</h1>
       <p className="text-gray-500 text-sm mb-8">
         Choose the setup that fits your needs.

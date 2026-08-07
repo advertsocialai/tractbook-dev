@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import StepProgress from "./StepProgress"
 
 const YEARS = Array.from({ length: 40 }, (_, i) => new Date().getFullYear() - i)
 const LEGAL_STRUCTURES = [
@@ -36,6 +37,7 @@ export default function BusinessInfo() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={2} total={6} />
       <h1 className="text-2xl font-bold mb-1">How will you use Tractbook?</h1>
       <p className="text-gray-500 text-sm mb-6">Tell us about you and your business</p>
 

@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import StepProgress from "./StepProgress"
 
 const CANADIAN_PROVINCES = [
   "Ontario", "Quebec", "British Columbia", "Alberta", "Manitoba",
@@ -11,6 +12,20 @@ const US_STATES = [
   "California", "Texas", "New York", "Florida", "Illinois", "Other",
 ]
 
+function isValidBN(value: string): boolean {
+  const cleaned = value.replace(/\s/g, "").toUpperCase()
+  return /^\d{9}$/.test(cleaned) || /^\d{9}[A-Z]{2}\d{4}$/.test(cleaned)
+}
+
+function isValidHST(value: string): boolean {
+  const cleaned = value.replace(/\s/g, "").toUpperCase()
+  return /^\d{9}RT\d{4}$/.test(cleaned)
+}
+
+function isValidEIN(value: string): boolean {
+  return /^\d{2}-?\d{7}$/.test(value.trim())
+}
+
 export default function TaxDetails() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -20,14 +35,24 @@ export default function TaxDetails() {
 
   const [businessNumber, setBusinessNumber] = useState("")
   const [noBN, setNoBN] = useState(false)
+  const [bnTouched, setBnTouched] = useState(false)
   const [taxRegNumber, setTaxRegNumber] = useState("")
   const [noTaxReg, setNoTaxReg] = useState(false)
+  const [taxRegTouched, setTaxRegTouched] = useState(false)
   const [region, setRegion] = useState("")
+
+  const bnFormatValid = noBN || (isCanada ? isValidBN(businessNumber) : isValidEIN(businessNumber))
+  const taxRegFormatValid = noTaxReg || (isCanada ? isValidHST(taxRegNumber) : taxRegNumber.trim().length > 0)
 
   const canSubmit =
     (noBN || businessNumber.trim().length > 0) &&
     (noTaxReg || taxRegNumber.trim().length > 0) &&
+    bnFormatValid &&
+    taxRegFormatValid &&
     region !== ""
+
+  const showBnError = bnTouched && !noBN && businessNumber.trim().length > 0 && !bnFormatValid
+  const showTaxRegError = taxRegTouched && !noTaxReg && taxRegNumber.trim().length > 0 && isCanada && !taxRegFormatValid
 
   function handleNext(e: React.FormEvent) {
     e.preventDefault()
@@ -39,6 +64,7 @@ export default function TaxDetails() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
+      <StepProgress current={3} total={6} />
       <h1 className="text-2xl font-bold mb-1">Business &amp; Tax Details</h1>
       <p className="text-gray-500 text-sm mb-6">Tell us about you and your business</p>
 
@@ -71,10 +97,16 @@ export default function TaxDetails() {
                 type="text"
                 value={businessNumber}
                 onChange={(e) => setBusinessNumber(e.target.value)}
+                onBlur={() => setBnTouched(true)}
                 disabled={noBN}
-                placeholder="123456789 RT0001"
+                placeholder="123456789 or 123456789RT0001"
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600 disabled:bg-gray-100"
               />
+              {showBnError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Enter a valid 9-digit Business Number (e.g. 123456789 or 123456789RT0001)
+                </p>
+              )}
               <label className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                 <input type="checkbox" checked={noBN} onChange={(e) => setNoBN(e.target.checked)} />
                 I don't have a BN yet - I'll add it later
@@ -91,10 +123,16 @@ export default function TaxDetails() {
                 type="text"
                 value={taxRegNumber}
                 onChange={(e) => setTaxRegNumber(e.target.value)}
+                onBlur={() => setTaxRegTouched(true)}
                 disabled={noTaxReg}
-                placeholder="RT 123456789"
+                placeholder="123456789RT0001"
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600 disabled:bg-gray-100"
               />
+              {showTaxRegError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Enter a valid GST/HST number in the format 123456789RT0001
+                </p>
+              )}
               <label className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                 <input type="checkbox" checked={noTaxReg} onChange={(e) => setNoTaxReg(e.target.checked)} />
                 I'm not registered for HST/GST yet
@@ -129,10 +167,16 @@ export default function TaxDetails() {
                 type="text"
                 value={businessNumber}
                 onChange={(e) => setBusinessNumber(e.target.value)}
+                onBlur={() => setBnTouched(true)}
                 disabled={noBN}
                 placeholder="12-3456789"
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-600 disabled:bg-gray-100"
               />
+              {showBnError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Enter a valid EIN in the format 12-3456789
+                </p>
+              )}
               <label className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                 <input type="checkbox" checked={noBN} onChange={(e) => setNoBN(e.target.checked)} />
                 I don't have an EIN yet - I'll add it later
@@ -195,3 +239,5 @@ export default function TaxDetails() {
     </div>
   )
 }
+
+
