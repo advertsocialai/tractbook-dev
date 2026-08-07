@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+﻿import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 
@@ -29,10 +29,20 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [verificationSent, setVerificationSent] = useState(false)
 
   const passwordState = getPasswordState(password)
   const message = strengthMessage[passwordState]
   const canSubmit = email.trim().length > 0 && password.length >= 8 && !loading
+
+  // After showing the "check your inbox" screen, drop the user on the
+  // sign-in page automatically so they're ready to log back in once
+  // they've clicked the verification link.
+  useEffect(() => {
+    if (!verificationSent) return
+    const timer = setTimeout(() => navigate("/login"), 4000)
+    return () => clearTimeout(timer)
+  }, [verificationSent, navigate])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -43,6 +53,9 @@ export default function SignUp() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
     })
 
     setLoading(false)
@@ -53,7 +66,9 @@ export default function SignUp() {
     }
 
     if (!data.session) {
-      setError("Account created, but no session was returned. Check Supabase email confirmation settings.")
+      // Email confirmation is required — Supabase already sent the
+      // verification link. Show the confirmation screen instead of erroring.
+      setVerificationSent(true)
       return
     }
 
@@ -66,6 +81,25 @@ export default function SignUp() {
       provider: "google",
     })
     if (oauthError) setError(oauthError.message)
+  }
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center px-6 py-10 max-w-sm mx-auto text-center">
+        <div className="text-3xl mb-4">📧</div>
+        <h1 className="text-2xl font-bold mb-2">Verify your email</h1>
+        <p className="text-gray-500 text-sm mb-8">
+          We sent a verification link to <span className="font-semibold text-gray-900">{email}</span>.
+          Click the link to activate your account, then sign in to continue.
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          className="w-full bg-gray-800 text-white rounded-lg py-3 font-medium"
+        >
+          Go to Sign In
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -117,7 +151,7 @@ export default function SignUp() {
           disabled={!canSubmit}
           className="w-full bg-gray-800 disabled:bg-gray-300 text-white rounded-lg py-3 font-medium"
         >
-          {loading ? "Creating account..." : "Create your free account"}
+          {loading ? "Signing up..." : "Sign up"}
         </button>
       </form>
 
