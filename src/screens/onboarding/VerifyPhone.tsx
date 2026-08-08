@@ -9,6 +9,18 @@ interface IncomingState {
   email?: string
 }
 
+const TEAM_TEST_EMAILS = [
+  "rakeshchandra.chandra21@gmail.com",
+  "kloroncanada@gmail.com",
+]
+
+function isAllowedTestUser(email?: string): boolean {
+  if (!email) return false
+  const normalized = email.toLowerCase()
+  if (normalized.endsWith("@nxtwave.ca")) return true
+  return TEAM_TEST_EMAILS.includes(normalized)
+}
+
 function isValidNANPNumber(phone: string): boolean {
   const digits = phone.replace(/\D/g, "")
   return digits.length === 10
@@ -31,6 +43,7 @@ export default function VerifyPhone() {
 
   const rawDigits = phone.replace(/\D/g, "")
   const canSubmit = isValidNANPNumber(phone) && !loading
+  const showSkip = import.meta.env.DEV || isAllowedTestUser(incoming.email)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,6 +71,21 @@ export default function VerifyPhone() {
         ...incoming,
       },
     })
+  }
+
+  function handleDevSkip() {
+    if (incoming.existingUser) {
+      navigate("/loading", {
+        state: {
+          nextPath: "/dashboard",
+          businessId: incoming.businessId,
+          businessName: incoming.businessName,
+          justCreated: false,
+        },
+      })
+    } else {
+      navigate("/loading", { state: { nextPath: "/role" } })
+    }
   }
 
   return (
@@ -97,6 +125,16 @@ export default function VerifyPhone() {
           {loading ? "Sending code..." : "Next"}
         </button>
       </form>
+
+      {showSkip && (
+        <button
+          type="button"
+          onClick={handleDevSkip}
+          className="text-gray-400 text-xs underline mt-4 text-center"
+        >
+          Skip phone verification (test mode)
+        </button>
+      )}
 
       <p className="text-center text-xs text-gray-500 mt-4">
         Your data is secure and won't be shared with anyone. Read the details in our{" "}

@@ -14,6 +14,18 @@ interface IncomingState {
   email?: string
 }
 
+const TEAM_TEST_EMAILS = [
+  "rakeshchandra.chandra21@gmail.com",
+  "kloroncanada@gmail.com",
+]
+
+function isAllowedTestUser(email?: string): boolean {
+  if (!email) return false
+  const normalized = email.toLowerCase()
+  if (normalized.endsWith("@nxtwave.ca")) return true
+  return TEAM_TEST_EMAILS.includes(normalized)
+}
+
 export default function VerifyCode() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -25,6 +37,8 @@ export default function VerifyCode() {
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  const showSkip = import.meta.env.DEV || isAllowedTestUser(incoming.email)
 
   useEffect(() => {
     if (secondsLeft <= 0) return
@@ -166,12 +180,12 @@ export default function VerifyCode() {
         </button>
       )}
 
-      {import.meta.env.DEV && (
+      {showSkip && (
         <button
           onClick={handleDevSkip}
           className="text-gray-400 text-xs underline mb-6"
         >
-          Skip for now (dev only)
+          Skip for now (test mode)
         </button>
       )}
 
