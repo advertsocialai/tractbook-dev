@@ -82,7 +82,7 @@ export default function CustomersList() {
           Estimates
         </button>
         <button
-          onClick={() => navigate("/coming-soon/invoices")}
+          onClick={() => navigate("/invoices")}
           className="flex-1 text-center py-2 text-sm font-semibold text-gray-500"
         >
           Invoices
@@ -155,6 +155,8 @@ export default function CustomersList() {
     </div>
   )
 }
+
+
 
 
 

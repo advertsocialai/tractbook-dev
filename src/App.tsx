@@ -23,6 +23,11 @@ import CreateEstimate from "./screens/sales/CreateEstimate";
 import EstimateDashboard from "./screens/sales/EstimateDashboard";
 import EditBusiness from "./screens/sales/EditBusiness";
 import EstimateDetail from "./screens/sales/EstimateDetail";
+import InvoiceDashboard from "./screens/sales/InvoiceDashboard";
+import CreateInvoice from "./screens/sales/CreateInvoice";
+import InvoiceDetail from "./screens/sales/InvoiceDetail";
+import SendInvoice from "./screens/sales/SendInvoice";
+import PrintInvoice from "./screens/sales/PrintInvoice";
 import SendEstimate from "./screens/sales/SendEstimate";
 import PrintEstimate from "./screens/sales/PrintEstimate";
 import RecordPayment from "./screens/sales/RecordPayment";
@@ -58,12 +63,24 @@ function App() {
       <Route path="/estimates/:id/print" element={<PrintEstimate />} />
       <Route path="/estimates/:id/payment" element={<RecordPayment />} />
       <Route path="/business" element={<EditBusiness />} />
+      <Route path="/invoices" element={<InvoiceDashboard />} />
+      <Route path="/invoices/new" element={<CreateInvoice />} />
+      <Route path="/invoices/:id/edit" element={<CreateInvoice />} />
+      <Route path="/invoices/:id" element={<InvoiceDetail />} />
+      <Route path="/invoices/:id/send" element={<SendInvoice />} />
+      <Route path="/invoices/:id/print" element={<PrintInvoice />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
 export default App;
+
+
+
+
+
+
 
 
 
