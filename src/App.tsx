@@ -16,6 +16,16 @@ import InviteAccountant from "./screens/onboarding/InviteAccountant";
 import Dashboard from "./screens/onboarding/Dashboard";
 import ComingSoon from "./screens/onboarding/ComingSoon";
 import AuthCallback from "./screens/onboarding/AuthCallback";
+import CustomersList from "./screens/sales/CustomersList";
+import AddCustomer from "./screens/sales/AddCustomer";
+import CustomerDetail from "./screens/sales/CustomerDetail";
+import CreateEstimate from "./screens/sales/CreateEstimate";
+import EstimateDashboard from "./screens/sales/EstimateDashboard";
+import EditBusiness from "./screens/sales/EditBusiness";
+import EstimateDetail from "./screens/sales/EstimateDetail";
+import SendEstimate from "./screens/sales/SendEstimate";
+import PrintEstimate from "./screens/sales/PrintEstimate";
+import RecordPayment from "./screens/sales/RecordPayment";
 
 function App() {
   return (
@@ -37,9 +47,23 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/coming-soon/:feature" element={<ComingSoon />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/customers" element={<CustomersList />} />
+      <Route path="/customers/new" element={<AddCustomer />} />
+      <Route path="/customers/:id" element={<CustomerDetail />} />
+      <Route path="/estimates/new" element={<CreateEstimate />} />
+      <Route path="/estimates" element={<EstimateDashboard />} />
+      <Route path="/estimates/:id" element={<EstimateDetail />} />
+      <Route path="/estimates/:id/edit" element={<CreateEstimate />} />
+      <Route path="/estimates/:id/send" element={<SendEstimate />} />
+      <Route path="/estimates/:id/print" element={<PrintEstimate />} />
+      <Route path="/estimates/:id/payment" element={<RecordPayment />} />
+      <Route path="/business" element={<EditBusiness />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
 export default App;
+
+
+

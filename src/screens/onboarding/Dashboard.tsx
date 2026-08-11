@@ -106,7 +106,7 @@ export default function Dashboard() {
           <span className="text-xs font-medium">Dashboard</span>
         </button>
         <button
-          onClick={() => navigate("/coming-soon/sales")}
+          onClick={() => navigate("/estimates")}
           className="flex flex-col items-center gap-1 text-gray-400"
         >
           <span>🏷️</span>
@@ -130,3 +130,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
