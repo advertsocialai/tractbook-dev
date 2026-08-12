@@ -1,4 +1,6 @@
-﻿import { Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import MobileLayout from "./layouts/MobileLayout";
 import Welcome from "./screens/onboarding/Welcome";
 import SignUp from "./screens/onboarding/SignUp";
 import SignIn from "./screens/onboarding/SignIn";
@@ -32,55 +34,74 @@ import SendEstimate from "./screens/sales/SendEstimate";
 import PrintEstimate from "./screens/sales/PrintEstimate";
 import RecordPayment from "./screens/sales/RecordPayment";
 
+//import by sahil or changes done by sahil
+import Openmainscreen from "./screens/onboarding/openingmainscreen";
+import Loader from "./components/ui/Loder";
+
+
 function App() {
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
   return (
-    <Routes>
-      <Route path="/" element={<Welcome />} />
-      <Route path="/sign-up" element={<SignUp />} />
-      <Route path="/login" element={<SignIn />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-phone" element={<VerifyPhone />} />
-      <Route path="/loading" element={<Loading />} />
-      <Route path="/verify-code" element={<VerifyCode />} />
-      <Route path="/role" element={<RoleSelect />} />
-      <Route path="/business-info" element={<BusinessInfo />} />
-      <Route path="/tax-details" element={<TaxDetails />} />
-      <Route path="/industry" element={<Industry />} />
-      <Route path="/business-context" element={<BusinessContext />} />
-      <Route path="/invite-accountant" element={<InviteAccountant />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/coming-soon/:feature" element={<ComingSoon />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/customers" element={<CustomersList />} />
-      <Route path="/customers/new" element={<AddCustomer />} />
-      <Route path="/customers/:id" element={<CustomerDetail />} />
-      <Route path="/estimates/new" element={<CreateEstimate />} />
-      <Route path="/estimates" element={<EstimateDashboard />} />
-      <Route path="/estimates/:id" element={<EstimateDetail />} />
-      <Route path="/estimates/:id/edit" element={<CreateEstimate />} />
-      <Route path="/estimates/:id/send" element={<SendEstimate />} />
-      <Route path="/estimates/:id/print" element={<PrintEstimate />} />
-      <Route path="/estimates/:id/payment" element={<RecordPayment />} />
-      <Route path="/business" element={<EditBusiness />} />
-      <Route path="/invoices" element={<InvoiceDashboard />} />
-      <Route path="/invoices/new" element={<CreateInvoice />} />
-      <Route path="/invoices/:id/edit" element={<CreateInvoice />} />
-      <Route path="/invoices/:id" element={<InvoiceDetail />} />
-      <Route path="/invoices/:id/send" element={<SendInvoice />} />
-      <Route path="/invoices/:id/print" element={<PrintInvoice />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      {isLoading && <Loader />}
+      <Routes>
+
+        <Route path="/" element={<Openmainscreen />} />
+
+        {/* ---- Mobile app screens ---- */}
+        <Route element={<MobileLayout />}>
+          <Route path="/openmainscreenmobile" element={<Welcome />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-phone" element={<VerifyPhone />} />
+          <Route path="/loading" element={<Loading />} />
+          <Route path="/verify-code" element={<VerifyCode />} />
+          <Route path="/role" element={<RoleSelect />} />
+          <Route path="/business-info" element={<BusinessInfo />} />
+          <Route path="/tax-details" element={<TaxDetails />} />
+          <Route path="/industry" element={<Industry />} />
+          <Route path="/business-context" element={<BusinessContext />} />
+          <Route path="/invite-accountant" element={<InviteAccountant />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/coming-soon/:feature" element={<ComingSoon />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/customers" element={<CustomersList />} />
+          <Route path="/customers/new" element={<AddCustomer />} />
+          <Route path="/customers/:id" element={<CustomerDetail />} />
+          <Route path="/estimates/new" element={<CreateEstimate />} />
+          <Route path="/estimates" element={<EstimateDashboard />} />
+          <Route path="/estimates/:id" element={<EstimateDetail />} />
+          <Route path="/estimates/:id/edit" element={<CreateEstimate />} />
+          <Route path="/estimates/:id/send" element={<SendEstimate />} />
+          <Route path="/estimates/:id/print" element={<PrintEstimate />} />
+          <Route path="/estimates/:id/payment" element={<RecordPayment />} />
+          <Route path="/business" element={<EditBusiness />} />
+          <Route path="/invoices" element={<InvoiceDashboard />} />
+          <Route path="/invoices/new" element={<CreateInvoice />} />
+          <Route path="/invoices/:id/edit" element={<CreateInvoice />} />
+          <Route path="/invoices/:id" element={<InvoiceDetail />} />
+          <Route path="/invoices/:id/send" element={<SendInvoice />} />
+          <Route path="/invoices/:id/print" element={<PrintInvoice />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 
+
 export default App;
-
-
-
-
-
-
-
-
-

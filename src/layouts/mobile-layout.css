@@ -1,0 +1,126 @@
+/* ============================================================
+   MOBILE APP LAYOUT — OPT-IN
+
+   These are the rules that used to live globally in index.css and
+   silently reshaped every page (the desktop phone frame, the page
+   gradient, the app heading scale).
+
+   Every selector below is now scoped to `.app-mobile`, which is
+   applied only by <MobileLayout />. A page rendered outside that
+   layout inherits nothing from this file.
+   ============================================================ */
+
+/* ---- Page surface (all viewports) ---- */
+.app-mobile {
+  /* The 34 app screens predate the design system and were built
+     against pure-black text and a 16px paragraph. Re-pointing the
+     semantic tokens here keeps them pixel-identical while the rest
+     of the app picks up the new palette. Delete these four lines
+     to migrate the app screens onto the design system. */
+  --ds-heading: var(--color-ink);
+  --ds-text: var(--color-ink);
+  --ds-text-strong: var(--color-ink);
+  --ds-text-muted: var(--color-muted);
+  --ds-p: 1rem;
+
+  min-height: 100dvh;
+  background: linear-gradient(
+    180deg,
+    rgba(177, 191, 254, 0.12) 0%,
+    rgba(177, 191, 254, 0.03) 35%,
+    rgba(255, 255, 255, 1) 70%
+  );
+}
+
+/* ---- Optional full-bleed shell used by individual screens ---- */
+.app-shell {
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 430px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+
+/* ---- App typography ----
+   Kept inside @layer base so a screen's own Tailwind utilities
+   (text-[31px], font-medium, …) still win, exactly as before. */
+@layer base {
+  .app-mobile :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .app-mobile :is(h1, h2, h3) {
+    /* --font-wordmark is no longer part of the theme; fall back to
+       the body face rather than resolving to an invalid value. */
+    font-family: var(--font-wordmark, var(--font-sans));
+    font-weight: 800;
+  }
+
+  .app-mobile h1 {
+    font-size: var(--text-app-h1);
+    line-height: 1.15;
+  }
+  .app-mobile h2 {
+    font-size: var(--text-app-h2);
+  }
+  .app-mobile h3 {
+    font-size: var(--text-app-h3);
+  }
+  .app-mobile h4 {
+    font-size: var(--text-app-h4);
+  }
+  .app-mobile h5 {
+    font-size: var(--text-app-h5);
+  }
+  .app-mobile h6 {
+    font-size: var(--text-app-h6);
+  }
+
+  .app-mobile p {
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .app-mobile small {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+}
+
+/* ---- Desktop phone frame ----
+   Below 768px the wrapper is inert and the screen renders
+   full-bleed, which is what it was designed for. */
+@media (min-width: 768px) {
+  .app-mobile {
+    background: #eef1f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 0;
+  }
+
+  .app-mobile__frame {
+    background: #fff;
+    width: 391px;
+    height: 844px;
+    overflow-y: auto;
+    border-radius: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* The screen sizes itself to the frame rather than the viewport.
+     Specificity is intentionally above .app-shell / Tailwind's
+     max-w-* + min-h-screen so nested screens keep their geometry. */
+  .app-mobile > .app-mobile__frame > * {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+  }
+}
