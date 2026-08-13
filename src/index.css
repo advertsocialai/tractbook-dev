@@ -1,0 +1,389 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800&display=swap");
+
+@theme {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-blue: #0d44da;
+  --color-brand-blue-dark: #002df8;
+  --color-brand-blue-mid: #124bd1;
+  --color-brand-blue-hover: #1d4ed8;
+  --color-brand-blue-light: #b1bffe;
+  --color-brand-error: #e0645f;
+  --color-brand-success: #4fb33f;
+  --color-brand-success-alt: #52b846;
+  --color-brand-success-hover: #34d399;
+  --color-brand-success-dark: #2e7053;
+  --color-ink: #000000;
+  --color-body: #545454;
+  --color-muted: #9e9e9e;
+  --color-border: #e2e2e2;
+  --color-border-soft: #b4b4b4;
+
+  --text-app-h1: 1.9375rem;
+  --text-app-h2: 1.375rem;
+  --text-app-h3: 1.125rem;
+  --text-app-h4: 1rem;
+  --text-app-h5: 0.9375rem;
+  --text-app-h6: 0.875rem;
+
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+}
+
+@layer base {
+
+  :root {
+    /* Headings */
+    --ds-h1: 34px;
+    --ds-h2: 28px;
+    --ds-h3: 24px;
+    --ds-h4: 20px;
+    --ds-h5: 18px;
+    --ds-h6: 16px;
+
+    /* Text */
+    --ds-p: 16px;
+    --ds-text-lg: 17px;
+    --ds-text-base: 16px;
+    --ds-text-sm: 14px;
+    --ds-text-xs: 12px;
+
+    /* Weights */
+    --ds-weight-normal: 400;
+    --ds-weight-medium: 500;
+    --ds-weight-semibold: 600;
+    --ds-weight-bold: 700;
+    --ds-weight-extrabold: 800;
+
+    /* Line heights */
+    --ds-leading-tight: 1.15;
+    --ds-leading-heading: 1.3;
+    --ds-leading-snug: 1.45;
+    --ds-leading-body: 1.6;
+    --ds-leading-relaxed: 1.75;
+
+    /* Letter spacing */
+    --ds-tracking-tight: -0.02em;
+    --ds-tracking-normal: 0;
+    --ds-tracking-wide: 0.08em;
+
+    /* Spacing scale */
+    --ds-space-1: 4px;
+    --ds-space-2: 8px;
+    --ds-space-3: 12px;
+    --ds-space-4: 16px;
+    --ds-space-5: 20px;
+    --ds-space-6: 24px;
+    --ds-space-8: 32px;
+    --ds-space-10: 40px;
+    --ds-space-12: 48px;
+    --ds-space-16: 64px;
+    --ds-space-20: 80px;
+
+    /* Radii — matches the reference page (6px nav, 10px forms) */
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 10px;
+    --ds-radius-lg: 12px;
+    --ds-radius-pill: 9999px;
+
+    /* Layout helpers (opt-in only, via .ds-container / .ds-section) */
+    --ds-container: 1280px;
+    --ds-gutter: 24px;
+    --ds-section-y: 64px;
+
+    /* ---- Semantic colours: LIGHT (default) ---- */
+    --ds-heading: #000000;
+    --ds-text: #1a1919;
+    --ds-text-strong: #0f172a;
+    --ds-text-muted: #64748b;
+    --ds-link: var(--color-brand-blue-mid);
+    --ds-border-color: var(--color-border);
+    --ds-divider: var(--color-border);
+
+    /* Button surfaces that need to invert between themes */
+    --ds-btn-neutral-bg: #0f172a;
+    --ds-btn-neutral-bg-hover: #1e293b;
+    --ds-btn-neutral-fg: #ffffff;
+    --ds-btn-ghost-hover: rgba(15, 23, 42, 0.06);
+
+    /* Dark page background used by the landing page */
+    --bg-dark: linear-gradient(125deg,
+        #000000 0%,
+        #000000 5%,
+        #020f30 65%,
+        #194432 98%,
+        #3d3c3c 100%);
+  }
+
+  /* ---- Semantic colours: DARK ----
+     Applied by any wrapper carrying data-theme="dark". */
+  [data-theme="dark"] {
+    --ds-heading: #ffffff;
+    --ds-text: rgba(255, 255, 255, 0.82);
+    --ds-text-strong: #ffffff;
+    --ds-text-muted: #94a3b8;
+    --ds-link: #cbd5e1;
+    --ds-border-color: rgba(255, 255, 255, 0.16);
+    --ds-divider: rgba(255, 255, 255, 0.18);
+
+    --ds-btn-neutral-bg: #ffffff;
+    --ds-btn-neutral-bg-hover: #f1f5f9;
+    --ds-btn-neutral-fg: #020617;
+    --ds-btn-ghost-hover: rgba(255, 255, 255, 0.08);
+  }
+
+  /* A themed wrapper drives the colour of everything inside it. */
+  [data-theme] {
+    color: var(--ds-text);
+  }
+
+  /* ==========================================================
+     2. RESPONSIVE TYPE + SPACING
+     ========================================================== */
+
+  /* Tablet */
+  @media (min-width: 768px) {
+    :root {
+      --ds-h1: 44px;
+      --ds-h2: 34px;
+      --ds-h3: 26px;
+      --ds-h4: 22px;
+      --ds-h5: 18px;
+      --ds-h6: 16px;
+      --ds-p: 17px;
+      --ds-text-lg: 18px;
+      --ds-section-y: 80px;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 1024px) {
+    :root {
+      --ds-h1: 54px;
+      --ds-h2: 40px;
+      --ds-h3: 30px;
+      --ds-h4: 24px;
+      --ds-h5: 20px;
+      --ds-h6: 16px;
+      --ds-p: 18px;
+      --ds-text-lg: 20px;
+      --ds-section-y: 96px;
+    }
+  }
+
+  /* Large desktop */
+  @media (min-width: 1536px) {
+    :root {
+      --ds-h1: 58px;
+      --ds-h2: 42px;
+      --ds-section-y: 112px;
+    }
+  }
+
+  /* ==========================================================
+     3. RESET + ELEMENT TYPOGRAPHY
+     Headings and paragraphs get size, weight, rhythm and colour
+     but never margins — margins are layout, and layout belongs
+     to the page. Use .ds-stack when you want automatic rhythm.
+     ========================================================== */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--ds-text-base);
+    font-weight: var(--ds-weight-normal);
+    line-height: var(--ds-leading-snug);
+    color: var(--ds-text);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--ds-heading);
+    font-weight: var(--ds-weight-bold);
+    line-height: var(--ds-leading-heading);
+    letter-spacing: var(--ds-tracking-tight);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--ds-h1);
+    line-height: var(--ds-leading-tight);
+  }
+
+  h2 {
+    font-size: var(--ds-h2);
+  }
+
+  h3 {
+    font-size: var(--ds-h3);
+  }
+
+  h4 {
+    font-size: var(--ds-h4);
+    letter-spacing: var(--ds-tracking-normal);
+  }
+
+  h5 {
+    font-size: var(--ds-h5);
+    font-weight: var(--ds-weight-semibold);
+    letter-spacing: var(--ds-tracking-normal);
+  }
+
+  h6 {
+    font-size: var(--ds-h6);
+    font-weight: var(--ds-weight-semibold);
+    letter-spacing: var(--ds-tracking-normal);
+  }
+
+  p {
+    font-size: var(--ds-p);
+    line-height: var(--ds-leading-body);
+    color: var(--ds-text);
+    text-wrap: pretty;
+  }
+
+  small {
+    font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-snug);
+    color: var(--ds-text-muted);
+  }
+
+  strong,
+  b {
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-text-strong);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-success);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-brand-blue-light);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Global Primary Button */
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #ffffff;
+    color: #020617;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #f1f5f9;
+  }
+
+  /* button green */
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    .btn-primary {
+      font-size: 16px;
+      padding: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .btn-primary {
+      font-size: 15px;
+      padding: 11px;
+    }
+  }
+
+  /* ================================
+   Social Signup Buttons
+================================ */
+
+  .social-signup-btn {
+    position: relative;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #124bd1;
+    color: #ffffff;
+  }
+
+  .social-signup-btn:hover {
+    background-color: #0c4cfa;
+  }
+
+  .microsoft-signup-btn {
+    position: relative;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #4FB33F;
+    color: #020617;
+  }
+
+
+  .microsoft-signup-btn:hover {
+    background-color: #21d406;
+  }
+
+
+}
+
