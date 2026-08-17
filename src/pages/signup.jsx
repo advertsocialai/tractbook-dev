@@ -9,14 +9,32 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [emailError, setEmailError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [verificationSent, setVerificationSent] = useState(false);
     const navigate = useNavigate();
 
-    const handlePasswordChange = (e) => {
-        setPassword(e.target.value);
-        if (error) setError("");
+    const validatePassword = (value) => {
+        const numCount = (value.match(/\d/g) || []).length;
+        const hasSpecial = /[%\$#!() ]/.test(value);
+
+        if (value.length > 0 && (numCount < 4 || !hasSpecial)) {
+            setError("Uh oh, this password isn't strong enough");
+            return false;
+        } else if (value.length === 0) {
+            setError("");
+            return false;
+        } else {
+            setError("");
+            return true;
+        }
     };
 
-    const handleSignIn = async (e) => {
+    const handlePasswordChange = (e) => {
+        const val = e.target.value;
+        setPassword(val);
+        validatePassword(val);
+    };
+
+    const handleCreateAccount = async (e) => {
         e.preventDefault();
         if (loading) return;
 
@@ -24,53 +42,84 @@ export default function LoginPage() {
         const isEmailValid = email.includes("@") && email.includes(".");
         if (!isEmailValid) {
             setEmailError(true);
-            return;
+        } else {
+            setEmailError(false);
         }
-        setEmailError(false);
+
+        // Password validation check
+        const isPasswordValid = validatePassword(password);
 
         if (password.length === 0) {
             setError("Please create a password first");
             return;
         }
 
-        setLoading(true);
-        setError("");
+        if (!isEmailValid || !isPasswordValid) return;
 
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        setLoading(true);
+
+        const { data, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                emailRedirectTo: `${window.location.origin}/login`,
+            },
         });
-
-        if (signInError) {
-            setLoading(false);
-            setError(signInError.message);
-            return;
-        }
-
-        const userId = data.user.id;
-        const { data: membership } = await supabase
-            .from("business_members")
-            .select("business_id, businesses(name)")
-            .eq("user_id", userId)
-            .eq("status", "active")
-            .limit(1)
-            .maybeSingle();
 
         setLoading(false);
 
-        const existingUser = !!membership;
-        const businessId = membership?.business_id;
-        const businessName = membership?.businesses?.name;
+        if (signUpError) {
+            setError(signUpError.message);
+            return;
+        }
 
-        navigate("/security-phone-no", {
-            state: {
-                existingUser,
-                businessId,
-                businessName,
-                email: data.user.email,
+        if (!data.session) {
+            // Email confirmation is required — Supabase already sent the
+            // verification link. Show the confirmation screen and let the
+            // user proceed manually once they've actually verified.
+            setVerificationSent(true);
+            return;
+        }
+
+        navigate("/security-phone-no");
+    };
+
+    const handleGoogleSignUp = async () => {
+        setError("");
+        const { error: oauthError } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/security-phone-no`,
             },
         });
+        if (oauthError) setError(oauthError.message);
     };
+
+    if (verificationSent) {
+        return (
+            <div className="mainparent">
+                <div className="lg:mb-14 mb-8">
+                    <img src="/logoblack.svg" alt="tractbook" className="h-10" />
+                </div>
+
+                <div className="md:text-center max-w-6xl mb-12">
+                    <h1 className="lg:mb-8 mb-4">Verify your email .</h1>
+                    <h5>
+                        We sent a verification link to <span className="font-bold">{email}</span>. Click the link to activate your account, then sign in to continue.
+                    </h5>
+                </div>
+
+                <div className="w-full max-w-[440px]">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="btn-primary text-[white] bg-[#545454] ">
+                        Go to Sign In
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="mainparent">
@@ -79,15 +128,15 @@ export default function LoginPage() {
             </div>
 
             <div className="md:text-center max-w-6xl mb-12">
-                <h1 className="lg:mb-8 mb-4">Welcome Back</h1>
+                <h1 className="lg:mb-8 mb-4">Your financial clarity starts here .</h1>
                 <h5>
                     Tractbook helps freelancers, consultants, and small businesses around the world simplify their finances
                 </h5>
             </div>
 
             <div className="w-full max-w-[440px]">
-                <form className="space-y-4" onSubmit={handleSignIn}>
-                    <label className="form-label">Email Address</label>
+                <form className="space-y-4" onSubmit={handleCreateAccount}>
+                    <label className="block text-[16px] font-medium mb-1">Email Address</label>
                     <input
                         type="email"
                         value={email}
@@ -133,7 +182,7 @@ export default function LoginPage() {
                         type="submit"
                         disabled={loading}
                         className="btn-primary text-[white] bg-[#545454] ">
-                        {loading ? "Signing in..." : "Create your free account"}
+                        {loading ? "Creating your account..." : "Create your free account"}
                     </button>
 
                     <div className="relative flex items-center py-2">
@@ -143,7 +192,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-3">
-                        <button type="button" className="social-signup-btn">
+                        <button type="button" onClick={handleGoogleSignUp} className="social-signup-btn">
                             <img src="/googlelogo.svg" className="w-9 h-9 p-0.5 absolute left-3 top-1/2 -translate-y-1/2" alt="" />
                             <span className="block text-center">Sign up with Google</span>
                         </button>
@@ -153,8 +202,15 @@ export default function LoginPage() {
                         </button>
                     </div>
 
+                    <div className="flex items-start gap-3 mt-8">
+                        <input type="checkbox" id="terms" required className="mt-1 accent-blue-500 h-4 w-4 rounded border-slate-700 bg-slate-900" />
+                        <label htmlFor="terms" className="text-[14px] text-dark-primary font-bold leading-tight">
+                            By signing up, you are indicating that you have read and agree to the <span className="underline cursor-pointer">Terms of Use</span> and <span className="underline cursor-pointer">Privacy Policy</span>
+                        </label>
+                    </div>
+
                     <p className="text-center text-[14px] font-medium pt-4 pb-10">
-                        Don't have an account? <Link to="/sign-up" className="font-bold hover:underline">Sign up now.</Link>
+                        Already have an account? <Link to="/login" className="font-bold hover:underline">Sign in now.</Link>
                     </p>
                 </form>
             </div>

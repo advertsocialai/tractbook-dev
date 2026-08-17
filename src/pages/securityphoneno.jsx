@@ -1,11 +1,34 @@
 import { useState } from "react";
 import { ShieldAlert } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "../supabase/client";
+
+const TEAM_TEST_EMAILS = [
+  "rakeshchandra.chandra21@gmail.com",
+  "kloroncanada@gmail.com",
+];
+
+function isAllowedTestUser(email) {
+  if (!email) return false;
+  const normalized = email.toLowerCase();
+  if (normalized.endsWith("@nxtwave.ca")) return true;
+  return TEAM_TEST_EMAILS.includes(normalized);
+}
+
+function isValidNANPNumber(phone) {
+  const digits = phone.replace(/[^\d]/g, "");
+  return digits.length === 10;
+}
 
 export default function SecurityPage() {
   const [phone, setPhone] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const incoming = location.state || {};
+
+  const showSkip = import.meta.env.DEV || isAllowedTestUser(incoming.email);
 
   const formatPhoneNumber = (value) => {
     if (!value) return value;
@@ -21,48 +44,84 @@ export default function SecurityPage() {
   const handlePhoneChange = (e) => {
     const formattedValue = formatPhoneNumber(e.target.value);
     setPhone(formattedValue);
-    if (error) setError(false);
+    if (error) setError("");
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (loading) return;
+
+    if (!isValidNANPNumber(phone)) {
+      setError("Enter a valid US/Canadian phone number");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
     const rawNumber = phone.replace(/[^\d]/g, "");
+    const fullPhone = `+1${rawNumber}`;
+    const displayPhone = `+1 (${rawNumber.slice(0, 3)}) ${rawNumber.slice(3, 6)}-${rawNumber.slice(6)}`;
 
-    if (rawNumber.length !== 10) {
-      setError(true);
+    // Sends the SMS OTP through Supabase and attaches the number to the account.
+    const { error: otpError } = await supabase.auth.updateUser({ phone: fullPhone });
+
+    setLoading(false);
+
+    if (otpError) {
+      setError(otpError.message);
+      return;
+    }
+
+    // redirect to otp page
+    navigate("/otp-verify", {
+      state: {
+        ...incoming,
+        phone: displayPhone,
+        fullPhone,
+      },
+    });
+  };
+
+  const handleDevSkip = () => {
+    if (incoming.existingUser) {
+      navigate("/dashboard", {
+        state: {
+          businessId: incoming.businessId,
+          businessName: incoming.businessName,
+          justCreated: false,
+        },
+      });
     } else {
-      setError(false);
-
-      // redirect to otp page
-      navigate("/otp-verify");
+      navigate("/role");
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center pt-10 px-6 font-sans">
+    <div className="mainparent">
       {/* Tractbook Logo */}
-      <div className="mb-20">
-        <img src="/logoblack.svg" alt="tractbook" className="h-8" />
+      <div className="lg:mb-14 mb-8">
+        <img src="/logoblack.svg" alt="tractbook" className="h-10" />
       </div>
 
       {/* Error Message Box */}
       {error && (
         <div className="w-full max-w-[480px] bg-red-50 border border-red-100 p-3 rounded-lg flex items-center gap-3 mb-6 animate-in fade-in slide-in-from-top-2">
           <ShieldAlert className="text-red-500 w-5 h-5" />
-          <p className="text-sm font-medium">Enter a valid US/Canadian phone number</p>
+          <p className="text-sm font-medium">{error}</p>
         </div>
       )}
 
       {/* Hero Text */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl md:text-[48px] font-bold text-black mb-4">Keep your account secure</h1>
-        <p className="text-gray-600 text-lg md:text-[20px] max-w-[500px] mx-auto leading-relaxed">
+      <div className=" mb-10">
+        <h1 className="lg:mb-8 mb-4">Keep your account secure</h1>
+        <h5 >
           Enter your number and we'll send a code to secure your account. No spam.
-        </p>
+        </h5>
       </div>
 
       {/* Input Section */}
       <div className="w-full max-w-[440px]">
-        <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">
+        <label className="form-label">
           Enter phone number
         </label>
 
@@ -84,7 +143,7 @@ export default function SecurityPage() {
           />
         </div>
 
-        <p className="mt-3 text-[12px] text-gray-400 leading-relaxed">
+        <p className="form-helper-text">
           Valid US/Canadian phone numbers only. <br />
           Message and data rates may apply.
         </p>
@@ -92,15 +151,26 @@ export default function SecurityPage() {
         {/* Next Button */}
         <button
           onClick={handleNext}
-          className="w-full mt-8 py-4 bg-[#002DF8] text-white rounded-lg font-bold text-[16px] hover:bg-blue-500 transition-all active:scale-[0.98]"
+          disabled={loading}
+          className="social-signup-btn"
         >
-          Next
+          {loading ? "Sending code..." : "Next"}
         </button>
+
+        {showSkip && (
+          <button
+            type="button"
+            onClick={handleDevSkip}
+            className="form-helper-text"
+          >
+            Skip phone verification (test mode)
+          </button>
+        )}
       </div>
 
       {/* Footer */}
       <div className="mt-auto pb-10 text-center">
-        <p className="text-[12px] text-gray-400">
+        <p className="form-helper-text">
           Your data is secure and won't be shared with anyone. Read the details in our{" "}
           <span className="text-blue-600 cursor-pointer hover:underline font-medium">Privacy Policy</span>
         </p>

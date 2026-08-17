@@ -83,10 +83,10 @@ export default function App() {
 
                 {/* Left Side: Text & Form */}
                 <div className="max-w-4xl w-full mx-auto lg:mx-0">
-                    <h1 className="text-[34px]  lg:text-[54px] font-bold leading-[1.3] mb-6 tracking-tight">
+                    <h1 className="text-[34px]  lg:text-[54px] font-bold leading-[1.3] mb-6 tracking-tight text-[#ffffff]">
                         Financial control, built for growing businesses
                     </h1>
-                    <p className="text-[16px] lg:text-[18px] mb-10 leading-relaxed">
+                    <p className="text-[#ffffff] text-[16px] lg:text-[18px] mb-10 leading-relaxed">
                         Create invoices, track expenses, and stay compliant — all from one intelligent dashboard.
                     </p>
 
